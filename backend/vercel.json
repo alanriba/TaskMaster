@@ -2,7 +2,7 @@
     "framework": null,
     "builds": [
       {
-        "src": "backend/wsgi.py",
+        "src": "taskmaster_project/wsgi.py",
         "use": "@vercel/python",
         "config": { "maxLambdaSize": "15mb", "runtime": "python3.11" }
       }
@@ -10,7 +10,7 @@
     "routes": [
       {
         "src": "/(.*)",
-        "dest": "backend/wsgi.py",
+        "dest": "taskmaster_project/wsgi.py",
         "headers": {
           "Access-Control-Allow-Origin": "*",
           "Access-Control-Allow-Methods": "GET, POST, OPTIONS, DELETE, PUT"
