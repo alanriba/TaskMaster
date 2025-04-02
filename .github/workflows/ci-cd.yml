@@ -1,4 +1,4 @@
-name: CI - Frontend & Backend
+name: TaskMaster CI/CD
 
 on:
   push:
