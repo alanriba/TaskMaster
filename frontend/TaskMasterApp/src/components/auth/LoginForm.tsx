@@ -57,7 +57,7 @@ const LoginForm: React.FC = () => {
           </Alert>
         )}
         
-        <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1, width: '100%' }}>
+        <Box component="form" data-testid="login-form" onSubmit={handleSubmit} sx={{ mt: 1, width: '100%' }}>
           <TextField
             margin="normal"
             required
