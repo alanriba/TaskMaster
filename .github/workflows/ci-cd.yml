@@ -26,7 +26,7 @@ jobs:
         run: bun install
 
       - name: Run frontend tests
-        run: bun run vitest run  # Cambiado a ejecutar vitest directamente
+        run: bun run:clean # Cambiado a ejecutar vitest directamente
 
       - name: Build frontend
         run: bun run build
