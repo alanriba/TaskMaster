@@ -1,11 +1,15 @@
-
 import { render, screen } from '@testing-library/react';
-import { describe, it, expect, vi} from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { MemoryRouter } from 'react-router-dom';
 import LoginPage from '../pages/LoginPage';
 
 vi.mock('../utils/tokenStorage', () => ({
   isAuthenticated: vi.fn().mockReturnValue(false),
+}));
+
+
+vi.mock('../components/auth/LoginForm', () => ({
+  default: () => <div data-testid="login-form">Mock LoginForm</div>,
 }));
 
 describe('LoginPage', () => {
@@ -15,7 +19,6 @@ describe('LoginPage', () => {
         <LoginPage />
       </MemoryRouter>
     );
-    
-    expect(screen.getByText(/login page/i)).toBeInTheDocument();
+    expect(screen.getByTestId('login-form')).toBeInTheDocument();
   });
 });

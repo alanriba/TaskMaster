@@ -22,7 +22,7 @@ def create_user():
 @pytest.mark.django_db
 class TestRegistration:
     def test_user_registration_successful(self, api_client):
-        url = reverse('user-register')
+        url = reverse('auth-register')
         data = {
             'username': 'newuser',
             'email': 'newuser@example.com',
@@ -36,7 +36,7 @@ class TestRegistration:
         assert User.objects.filter(username='newuser').exists()
     
     def test_user_registration_password_mismatch(self, api_client):
-        url = reverse('user-register')
+        url = reverse('auth-register')
         data = {
             'username': 'newuser',
             'email': 'newuser@example.com',
@@ -50,7 +50,7 @@ class TestRegistration:
         assert not User.objects.filter(username='newuser').exists()
     
     def test_user_registration_username_exists(self, api_client, create_user):
-        url = reverse('user-register')
+        url = reverse('auth-register')
         data = {
             'username': 'testuser',  # Este usuario ya existe
             'email': 'another@example.com',
@@ -65,7 +65,7 @@ class TestRegistration:
 @pytest.mark.django_db
 class TestLogin:
     def test_login_successful(self, api_client, create_user):
-        url = reverse('user-login')
+        url = reverse('auth-login')
         data = {
             'username': 'testuser',
             'password': 'securepassword123'
@@ -77,7 +77,7 @@ class TestLogin:
         assert 'user' in response.data
     
     def test_login_invalid_credentials(self, api_client, create_user):
-        url = reverse('user-login')
+        url = reverse('auth-login')
         data = {
             'username': 'testuser',
             'password': 'wrongpassword'
@@ -87,7 +87,7 @@ class TestLogin:
         assert response.status_code == status.HTTP_400_BAD_REQUEST
     
     def test_login_user_not_found(self, api_client):
-        url = reverse('user-login')
+        url = reverse('auth-login')
         data = {
             'username': 'nonexistentuser',
             'password': 'anypassword'
@@ -100,7 +100,7 @@ class TestLogin:
 class TestLogout:
     def test_logout_successful(self, api_client, create_user):
         # Primero hacemos login para obtener un token
-        login_url = reverse('user-login')
+        login_url = reverse('auth-login')
         login_data = {
             'username': 'testuser',
             'password': 'securepassword123'
@@ -112,12 +112,12 @@ class TestLogout:
         api_client.credentials(HTTP_AUTHORIZATION=f'Token {token}')
         
         # Hacemos logout
-        logout_url = reverse('user-logout')
+        logout_url = reverse('auth-logout')
         response = api_client.post(logout_url)
         assert response.status_code == status.HTTP_204_NO_CONTENT
         
         # Verificamos que el token ha sido eliminado intentando acceder a un endpoint protegido
-        me_url = reverse('user-me')
+        me_url = reverse('auth-me')
         me_response = api_client.get(me_url)
         assert me_response.status_code == status.HTTP_401_UNAUTHORIZED
 
@@ -125,7 +125,7 @@ class TestLogout:
 class TestUserProfile:
     def test_get_profile_authenticated(self, api_client, create_user):
         # Login
-        login_url = reverse('user-login')
+        login_url = reverse('auth-login')
         login_data = {
             'username': 'testuser',
             'password': 'securepassword123'
@@ -137,13 +137,13 @@ class TestUserProfile:
         api_client.credentials(HTTP_AUTHORIZATION=f'Token {token}')
         
         # Obtener perfil
-        me_url = reverse('user-me')
+        me_url = reverse('auth-me')
         response = api_client.get(me_url)
         assert response.status_code == status.HTTP_200_OK
         assert response.data['username'] == 'testuser'
         assert response.data['email'] == 'test@example.com'
     
     def test_get_profile_unauthenticated(self, api_client):
-        me_url = reverse('user-me')
+        me_url = reverse('auth-me')
         response = api_client.get(me_url)
         assert response.status_code == status.HTTP_401_UNAUTHORIZED

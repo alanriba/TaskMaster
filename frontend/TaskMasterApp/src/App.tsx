@@ -1,56 +1,38 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { ThemeProvider, createTheme, CssBaseline } from '@mui/material';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { isAuthenticated } from './utils/tokenStorage';
-
-
 import React from 'react';
-import DashboardPage from './pages/DashboardPage';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+ 
+import AuthProvider from './providers/AuthProvider';
 import LoginPage from './pages/LoginPage';
-import RegisterPage from './pages/RegisterPage';
+import RegisterPage from './pages/RegisterPage'; 
+import Navbar from './components/layout/NavBar';
+import ProtectedRoute from './components/auth/ProtectedRouted';
+import DashboardPage from './pages/DashboardPage';
+import ThemeProvider from './providers/ThemeProviders';
 
-
-const queryClient = new QueryClient();
-
-
-const theme = createTheme({
-  palette: {
-    primary: {
-      main: '#1976d2',
-    },
-    secondary: {
-      main: '#dc004e',
-    },
-  },
-});
-
-const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
-  return isAuthenticated() ? <>{children}</> : <Navigate to="/login" />;
-};
-
-function App() {
+const App: React.FC = () => {
   return (
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
+    <ThemeProvider>
+      <AuthProvider>
         <Router>
-          <Routes>
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
-            <Route 
-              path="/" 
-              element={
-                <PrivateRoute>
-                  <DashboardPage />
-                </PrivateRoute>
-              } 
-            />
-            <Route path="*" element={<Navigate to="/" />} />
-          </Routes>
+          <Navbar />
+          <main className="container">
+            <Routes>
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/register" element={<RegisterPage />} />
+              <Route 
+                path="/" 
+                element={
+                  <ProtectedRoute>
+                    <DashboardPage />
+                  </ProtectedRoute>
+                } 
+              />
+            </Routes>
+          </main>
         </Router>
-      </ThemeProvider>
-    </QueryClientProvider>
+      </AuthProvider>
+    </ThemeProvider>
   );
-}
+};
 
 export default App;

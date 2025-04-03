@@ -1,5 +1,13 @@
-const RegisterPage = () => {
-    return <div>Register Page</div>;
-  };
-  
-  export default RegisterPage;
+import React from "react";
+import RegisterForm from "../components/auth/RegisterForm";
+
+const RegisterPage: React.FC = () => {
+  return (
+    <div className="register-page">
+         <RegisterForm />
+ 
+    </div>
+  );
+};
+
+export default RegisterPage;
