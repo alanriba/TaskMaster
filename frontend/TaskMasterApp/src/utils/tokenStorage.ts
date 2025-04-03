@@ -1,17 +1,36 @@
-export const TOKEN_KEY = 'auth_token';
+import { User } from '../models/User';
 
-export const setToken = (token: string): void => {
-  localStorage.setItem(TOKEN_KEY, token);
+// Token functions
+export const getToken = (): string | null => {
+  return localStorage.getItem('token');
 };
 
-export const getToken = (): string | null => {
-  return localStorage.getItem(TOKEN_KEY);
+export const setToken = (token: string): void => {
+  localStorage.setItem('token', token);
 };
 
 export const removeToken = (): void => {
-  localStorage.removeItem(TOKEN_KEY);
+  localStorage.removeItem('token');
 };
 
-export const isAuthenticated = (): boolean => {
-  return getToken() !== null;
+// User functions
+export const getUser = (): User | null => {
+  const userStr = localStorage.getItem('user');
+  if (userStr) {
+    try {
+      return JSON.parse(userStr) as User;
+    } catch (e) {
+      console.error('Error parsing user from localStorage', e);
+      return null;
+    }
+  }
+  return null;
+};
+
+export const setUser = (user: User): void => {
+  localStorage.setItem('user', JSON.stringify(user));
+};
+
+export const removeUser = (): void => {
+  localStorage.removeItem('user');
 };

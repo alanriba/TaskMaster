@@ -28,6 +28,7 @@ jobs:
       - name: Run frontend tests
         run: bun run test:clean
 
+
       - name: Build frontend
         run: bun run build
 
@@ -48,6 +49,14 @@ jobs:
         with:
           python-version: '3.11'
 
+      - name: Cache pip dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
@@ -60,7 +69,6 @@ jobs:
           python manage.py migrate
 
       - name: Run backend tests
-        working-directory: backend
         run: |
-          echo "Running Django test..."
-          python manage.py test users
+          echo "Running Django tests..."
+          pytest

@@ -1,5 +1,12 @@
-const LoginPage = () => {
-    return <div>Login Page</div>;
-  };
-  
-  export default LoginPage;
+import React from 'react';
+import LoginForm from '../components/auth/LoginForm';
+
+const LoginPage: React.FC = () => {
+  return (
+    <div className="login-page">
+      <LoginForm />
+    </div>
+  );
+};
+
+export default LoginPage;
