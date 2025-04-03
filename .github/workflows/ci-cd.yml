@@ -60,4 +60,7 @@ jobs:
           python manage.py migrate
 
       - name: Run backend tests
-        run: python manage.py test
+        working-directory: backend
+        run: |
+          echo "Running Django test..."
+          python manage.py test
