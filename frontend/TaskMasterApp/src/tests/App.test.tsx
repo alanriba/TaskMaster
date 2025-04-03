@@ -15,7 +15,7 @@ vi.mock('../components/auth/LoginForm', () => ({
 describe('LoginPage', () => {
   it('renders login page correctly', () => {
     render(
-      <MemoryRouter>
+      <MemoryRouter initialEntries={['/login']}>
         <LoginPage />
       </MemoryRouter>
     );
