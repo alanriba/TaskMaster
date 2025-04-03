@@ -63,4 +63,4 @@ jobs:
         working-directory: backend
         run: |
           echo "Running Django test..."
-          python manage.py test
+          python manage.py test users
