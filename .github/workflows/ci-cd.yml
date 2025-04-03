@@ -70,4 +70,4 @@ jobs:
       - name: Run backend tests
         run: |
           echo "Running Django tests..."
-          python manage.py test users
+          pytest
