@@ -26,7 +26,8 @@ jobs:
         run: bun install
 
       - name: Run frontend tests
-        run: bun test
+        run: bun run test
+
 
       - name: Build frontend
         run: bun run build
