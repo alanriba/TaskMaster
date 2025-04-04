@@ -19,6 +19,7 @@ export default defineConfig({
       reporter: ['text', 'json', 'html'],
       exclude: ['node_modules/', 'src/setupTests.ts']
     },
+    isolate: false,
 
     pool: 'forks', 
     poolOptions: {
