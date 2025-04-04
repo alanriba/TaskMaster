@@ -38,6 +38,7 @@ class Task(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="tasks")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    tags = models.ManyToManyField('Tag', related_name='tasks', blank=True)
 
 
     class Meta:
@@ -45,3 +46,15 @@ class Task(models.Model):
         
     def __str__(self):
         return self.title
+    
+class Tag(models.Model):
+    name = models.CharField(max_length=50, unique=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='tags')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('name', 'user')  # Para evitar duplicados por usuario
+        ordering = ['name']
+
+    def __str__(self):
+        return self.name

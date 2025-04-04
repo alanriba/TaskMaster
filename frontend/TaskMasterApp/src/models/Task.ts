@@ -13,6 +13,7 @@ export interface Task {
   category_color: string | null;
   created_at: string;
   updated_at: string;
+  tags?: {id: number; name: string}[];
 }
 
 export interface TaskCreate {
@@ -22,6 +23,7 @@ export interface TaskCreate {
   priority?: TaskPriority;
   due_date?: string | null;
   category?: number | null;
+  tag_ids?: number[];
 }
 
 export interface TaskUpdate extends TaskCreate {

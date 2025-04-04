@@ -2,16 +2,7 @@ import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { vi, describe, expect, it, beforeEach } from 'vitest';
 import TaskList from '../../components/tasks/TaskList';
 import { Task } from '../../models/Task';
-vi.mock('../../api/taskApi', () => ({
-  TaskServiceApi: {
-    getAll: vi.fn(),
-    delete: vi.fn()
-  }
-}));
 
-import { TaskServiceApi } from '../../api/taskApi';
-
-// ✅ Mock del componente CreateTaskForm
 vi.mock('../../components/tasks/CreateTaskForm', () => ({
   default: () => <div data-testid="create-task-form">CreateTaskForm</div>
 }));
@@ -19,6 +10,23 @@ vi.mock('../../components/tasks/CreateTaskForm', () => ({
 vi.mock('../../components/tasks/EditTaskForm', () => ({
   default: () => <div data-testid="edit-task-form">Mock EditTaskForm</div>
 }));
+
+
+vi.mock('../../api/taskApi', async () => {
+  return {
+    TaskServiceApi: {
+      getAll: vi.fn(),
+      delete: vi.fn(),
+      create: vi.fn(),
+      update: vi.fn(),
+      changeStatus: vi.fn(),
+      getAllTags: vi.fn().mockResolvedValue([]),
+      createTag: vi.fn()
+    }
+  };
+});
+
+import { TaskServiceApi } from '../../api/taskApi';
 
 const mockTasks: Task[] = [
   {
@@ -32,7 +40,8 @@ const mockTasks: Task[] = [
     category_name: null,
     category_color: null,
     created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
+    updated_at: new Date().toISOString(),
+    tags: [],
   }
 ];
 
@@ -42,11 +51,15 @@ describe('TaskList', () => {
   });
 
   it('should render title and button', async () => {
+
     (TaskServiceApi.getAll as ReturnType<typeof vi.fn>).mockResolvedValue([]);
     render(<TaskList />);
+
     await waitFor(() => expect(TaskServiceApi.getAll).toHaveBeenCalled());
+    
     expect(screen.getByText(/my tasks/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /new task/i })).toBeInTheDocument();
+  
   });
 
   it('should show loading spinner initially', async () => {

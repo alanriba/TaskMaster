@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   Button,
   TextField,
@@ -13,11 +13,14 @@ import {
   FormHelperText,
   Snackbar,
   Alert,
-  SelectChangeEvent
-} from '@mui/material';
+  SelectChangeEvent,
+  Autocomplete,
+  Chip,
+} from "@mui/material";
 
-import { Task, TaskUpdate } from '../../models/Task';
-import { TaskServiceApi } from '../../api/taskApi';
+import { Task, TaskUpdate } from "../../models/Task";
+import { TaskServiceApi } from "../../api/taskApi";
+import { Tag } from "../../models/Tag";
 
 interface EditTaskFormProps {
   open: boolean;
@@ -26,13 +29,18 @@ interface EditTaskFormProps {
   task: Task;
 }
 
-const EditTaskForm: React.FC<EditTaskFormProps> = ({ open, onClose, onTaskUpdated, task }) => {
-  const [formData, setFormData] = useState<Omit<TaskUpdate, 'id'>>({
-    title: '',
-    description: '',
-    status: 'pending',
-    priority: 'medium',
-    due_date: null
+const EditTaskForm: React.FC<EditTaskFormProps> = ({
+  open,
+  onClose,
+  onTaskUpdated,
+  task,
+}) => {
+  const [formData, setFormData] = useState<Omit<TaskUpdate, "id">>({
+    title: "",
+    description: "",
+    status: "pending",
+    priority: "medium",
+    due_date: null,
   });
 
   const [errors, setErrors] = useState<{
@@ -43,39 +51,57 @@ const EditTaskForm: React.FC<EditTaskFormProps> = ({ open, onClose, onTaskUpdate
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [feedback, setFeedback] = useState<{
     message: string;
-    severity: 'success' | 'error';
+    severity: "success" | "error";
     open: boolean;
-  }>({ message: '', severity: 'success', open: false });
+  }>({ message: "", severity: "success", open: false });
+
+  const [allTags, setAllTags] = useState<Tag[]>([]);
+  const [selectedTags, setSelectedTags] = useState<(Tag | string)[]>([]);
+  const [inputTagValue, setInputTagValue] = useState("");
+
+  useEffect(() => {
+    TaskServiceApi.getAllTags()
+      .then(setAllTags)
+      .catch(() => setAllTags([]));
+  }, []);
 
   useEffect(() => {
     if (task) {
-      const { ...rest } = task;
+      const { tags, ...rest } = task;
       setFormData(rest);
-    }
-  }, [task]);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      const tagsMapped = tags?.map((tag) => {
+        const existing = allTags.find((t) => t.id === tag.id);
+        return existing || tag;
+      });
+      setSelectedTags(tagsMapped || []);
+    }
+  }, [task, allTags]);
+
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
 
     if (errors[name as keyof typeof errors]) {
-      setErrors(prev => ({ ...prev, [name]: undefined }));
+      setErrors((prev) => ({ ...prev, [name]: undefined }));
     }
   };
 
   const handleSelectChange = (e: SelectChangeEvent) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
 
     if (errors[name as keyof typeof errors]) {
-      setErrors(prev => ({ ...prev, [name]: undefined }));
+      setErrors((prev) => ({ ...prev, [name]: undefined }));
     }
   };
 
   const validate = (): boolean => {
     const newErrors: typeof errors = {};
     if (!formData.title.trim()) {
-      newErrors.title = 'Title is required';
+      newErrors.title = "Title is required";
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -87,19 +113,41 @@ const EditTaskForm: React.FC<EditTaskFormProps> = ({ open, onClose, onTaskUpdate
     setIsSubmitting(true);
 
     try {
-      await TaskServiceApi.update({ ...formData, id: task.id });
+      const createdTags: Tag[] = [];
+
+      for (const tag of selectedTags) {
+        const tagName = typeof tag === "string" ? tag.trim() : tag.name.trim();
+
+        const existing =
+          allTags.find((t) => t.name.toLowerCase() === tagName.toLowerCase()) ||
+          createdTags.find(
+            (t) => t.name.toLowerCase() === tagName.toLowerCase()
+          );
+
+        if (existing) {
+          createdTags.push(existing);
+        } else {
+          const newTag = await TaskServiceApi.createTag(tagName);
+          createdTags.push(newTag);
+        }
+      }
+
+      const tag_ids = createdTags.map((tag) => tag.id);
+
+      await TaskServiceApi.update({ ...formData, id: task.id, tag_ids });
       setFeedback({
-        message: 'Task updated successfully!',
-        severity: 'success',
-        open: true
+        message: "Task updated successfully!",
+        severity: "success",
+        open: true,
       });
       onTaskUpdated();
       onClose();
     } catch (error) {
       setFeedback({
-        message: error instanceof Error ? error.message : 'Failed to update task',
-        severity: 'error',
-        open: true
+        message:
+          error instanceof Error ? error.message : "Failed to update task",
+        severity: "error",
+        open: true,
       });
     } finally {
       setIsSubmitting(false);
@@ -107,7 +155,7 @@ const EditTaskForm: React.FC<EditTaskFormProps> = ({ open, onClose, onTaskUpdate
   };
 
   const handleCloseFeedback = () => {
-    setFeedback(prev => ({ ...prev, open: false }));
+    setFeedback((prev) => ({ ...prev, open: false }));
   };
 
   return (
@@ -159,7 +207,9 @@ const EditTaskForm: React.FC<EditTaskFormProps> = ({ open, onClose, onTaskUpdate
               <MenuItem value="in_progress">In Progress</MenuItem>
               <MenuItem value="completed">Completed</MenuItem>
             </Select>
-            <FormHelperText>Select the current status of this task</FormHelperText>
+            <FormHelperText>
+              Select the current status of this task
+            </FormHelperText>
           </FormControl>
 
           <FormControl fullWidth margin="dense">
@@ -168,7 +218,7 @@ const EditTaskForm: React.FC<EditTaskFormProps> = ({ open, onClose, onTaskUpdate
               labelId="priority-label"
               id="priority"
               name="priority"
-              value={formData.priority || ''}
+              value={formData.priority || ""}
               label="Priority"
               onChange={handleSelectChange}
             >
@@ -188,20 +238,83 @@ const EditTaskForm: React.FC<EditTaskFormProps> = ({ open, onClose, onTaskUpdate
             fullWidth
             variant="outlined"
             InputLabelProps={{ shrink: true }}
-            value={formData.due_date || ''}
+            value={formData.due_date || ""}
             onChange={handleInputChange}
+          />
+
+          <Autocomplete
+            multiple
+            freeSolo
+            options={allTags}
+            getOptionLabel={(option) =>
+              typeof option === "string" ? option : option.name
+            }
+            value={selectedTags}
+            inputValue={inputTagValue}
+            onInputChange={(_, newValue) => setInputTagValue(newValue)}
+            onBlur={() => {
+              if (inputTagValue.trim() !== "") {
+                const name = inputTagValue.trim();
+                const existing = allTags.find(
+                  (tag) => tag.name.toLowerCase() === name.toLowerCase()
+                );
+                const alreadySelected = selectedTags.find(
+                  (t) =>
+                    (typeof t === "string" &&
+                      t.toLowerCase() === name.toLowerCase()) ||
+                    (typeof t !== "string" &&
+                      t.name.toLowerCase() === name.toLowerCase())
+                );
+                if (!alreadySelected) {
+                  setSelectedTags((prev) => [...prev, existing || name]);
+                }
+                setInputTagValue("");
+              }
+            }}
+            onChange={(_, newValue) => {
+              const processed = newValue.map((item) =>
+                typeof item === "string" ? item.trim() : item.name.trim()
+              );
+              const unique = Array.from(new Set(processed));
+              const mapped = unique.map((name) => {
+                const existing = allTags.find(
+                  (tag) => tag.name.toLowerCase() === name.toLowerCase()
+                );
+                return existing || name;
+              });
+              setSelectedTags(mapped);
+            }}
+            renderTags={(value, getTagProps) =>
+              value.map((option, index) => (
+                <Chip
+                  variant="outlined"
+                  label={typeof option === "string" ? option : option.name}
+                  {...getTagProps({ index })}
+                />
+              ))
+            }
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="Tags"
+                placeholder="Edit or add tags"
+                margin="dense"
+              />
+            )}
           />
         </DialogContent>
 
         <DialogActions>
-          <Button onClick={onClose} color="inherit">Cancel</Button>
+          <Button onClick={onClose} color="inherit">
+            Cancel
+          </Button>
           <Button
             onClick={handleSubmit}
             color="primary"
             variant="contained"
             disabled={isSubmitting}
           >
-            {isSubmitting ? 'Saving...' : 'Update Task'}
+            {isSubmitting ? "Saving..." : "Update Task"}
           </Button>
         </DialogActions>
       </Dialog>
@@ -210,13 +323,13 @@ const EditTaskForm: React.FC<EditTaskFormProps> = ({ open, onClose, onTaskUpdate
         open={feedback.open}
         autoHideDuration={6000}
         onClose={handleCloseFeedback}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
       >
         <Alert
           onClose={handleCloseFeedback}
           severity={feedback.severity}
           variant="filled"
-          sx={{ width: '100%' }}
+          sx={{ width: "100%" }}
         >
           {feedback.message}
         </Alert>

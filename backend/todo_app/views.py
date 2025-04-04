@@ -3,8 +3,8 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend
-from .models import Task, Category
-from .serializers import TaskSerializer, CategorySerializer
+from .models import Task, Category, Tag
+from .serializers import TaskSerializer, CategorySerializer, TagSerializer
 
 class CategoryViewSet(viewsets.ModelViewSet):
     serializer_class = CategorySerializer
@@ -25,7 +25,16 @@ class TaskViewSet(viewsets.ModelViewSet):
     ordering_fields = ['title', 'due_date', 'priority', 'status', 'created_at']
     
     def get_queryset(self):
-        return Task.objects.filter(user=self.request.user)
+        user = self.request.user
+        queryset = Task.objects.filter(user=user)
+
+        # ✅ Filtro por tags (por ejemplo: ?tags=1,2)
+        tag_ids = self.request.query_params.get('tags')
+        if tag_ids:
+            tag_ids = [int(tag_id) for tag_id in tag_ids.split(',')]
+            queryset = queryset.filter(tags__id__in=tag_ids).distinct()
+
+        return queryset
     
     @action(detail=True, methods=['post'])
     def change_status(self, request, pk=None):
@@ -42,3 +51,13 @@ class TaskViewSet(viewsets.ModelViewSet):
         task.save()
         serializer = self.get_serializer(task)
         return Response(serializer.data)
+
+class TagViewSet(viewsets.ModelViewSet):
+    serializer_class = TagSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Tag.objects.filter(user=self.request.user).order_by('name')
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
