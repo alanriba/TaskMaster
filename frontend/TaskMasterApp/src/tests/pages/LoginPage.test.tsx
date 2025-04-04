@@ -5,7 +5,7 @@ import { renderWithProviders } from '../test-utils';
 
 // Mock the LoginForm component to simplify testing
 vi.mock('../../components/auth/LoginForm', () => ({
-  default: () => <div data-testid="login-form-mock">Login Form Component</div>
+  default: () => <div data-testid="login-form">Login Form Component</div>
 }));
 
 // IMPORTAR DESPUÉS DEL MOCK
@@ -16,7 +16,7 @@ describe('LoginPage', () => {
     const { container } = renderWithProviders(<LoginPage />);
     
     // Check if the LoginForm component is rendered
-    expect(screen.getByTestId('login-form-mock')).toBeInTheDocument();
+    expect(screen.getByTestId('login-form')).toBeInTheDocument();
     
     // Check if the page has the correct class
     expect(container.querySelector('.login-page')).toBeInTheDocument();
