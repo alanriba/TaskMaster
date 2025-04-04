@@ -2,9 +2,12 @@ from rest_framework import viewsets, status, generics
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
-from rest_framework.decorators import action
+from rest_framework.decorators import action, api_view, permission_classes
 from django.contrib.auth import get_user_model
 from .serializers import UserSerializer, RegisterSerializer, LoginSerializer
+
+from django.core.management import call_command
+from django.http import JsonResponse
 
 User = get_user_model()
 
@@ -55,3 +58,13 @@ class UserViewSet(viewsets.GenericViewSet):
     def me(self, request):
         serializer = UserSerializer(request.user)
         return Response(serializer.data)
+    
+
+    @api_view(['POST'])
+    @permission_classes([AllowAny])  # ⚠️ Quita esto después
+    def run_migrations(request):
+        try:
+            call_command('migrate', interactive=False)
+            return JsonResponse({'status': 'success', 'message': 'Migrations completed'})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
