@@ -3,9 +3,17 @@ import '@testing-library/jest-dom';
 import { describe, it, expect, vi } from 'vitest';
 import { renderWithProviders } from '../test-utils';
 
-// Mock the LoginForm component to simplify testing
-vi.mock('../../components/auth/LoginForm', () => ({
-  default: () => <div data-testid="login-form">Login Form Component</div>
+vi.mock('../../hooks/useAuth', () => ({
+  useAuth: () => ({
+    isAuthenticated: false,
+    login: vi.fn(),
+    logout: vi.fn(),
+    register: vi.fn(),
+    clearError: vi.fn(),
+    user: null,
+    error: null,
+    loading: false,
+  }),
 }));
 
 // IMPORTAR DESPUÉS DEL MOCK
