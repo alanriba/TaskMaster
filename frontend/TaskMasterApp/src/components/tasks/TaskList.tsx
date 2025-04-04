@@ -20,7 +20,6 @@ import { Task } from '../../models/Task';
 import CreateTaskForm from './CreateTaskForm';
 import { User } from '../../models/User';
 
- 
 type TaskStatus = 'pending' | 'in_progress' | 'completed';
 type ChipColor = ChipProps['color'];
 
@@ -54,7 +53,7 @@ interface TaskListProps {
   user?: User;
 }
 
-const TaskList: React.FC<TaskListProps> = ( ) => {
+const TaskList: React.FC<TaskListProps> = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -63,7 +62,7 @@ const TaskList: React.FC<TaskListProps> = ( ) => {
   const fetchTasks = async () => {
     setLoading(true);
     setError(null);
-    
+
     try {
       const tasksData = await TaskServiceApi.getAll();
       setTasks(tasksData);
@@ -129,26 +128,23 @@ const TaskList: React.FC<TaskListProps> = ( ) => {
                 <ListItem alignItems="flex-start" sx={{ py: 2 }}>
                   <ListItemText
                     primary={
-                      <Typography 
-                        variant="h6" 
-                        component="div" 
-                        sx={{ mb: 1 }}
-                      >
+                      <Typography variant="h6" component="div" sx={{ mb: 1 }}>
                         {task.title}
                       </Typography>
                     }
                     secondary={
-                      <>
+                      <Box component="div">
                         <Typography
                           variant="body2"
                           color="text.primary"
-                          sx={{ 
+                          sx={{
                             mb: 1,
                             display: '-webkit-box',
                             WebkitLineClamp: 3,
                             WebkitBoxOrient: 'vertical',
                             overflow: 'hidden'
                           }}
+                          component="div"
                         >
                           {task.description || "No description provided"}
                         </Typography>
@@ -163,7 +159,7 @@ const TaskList: React.FC<TaskListProps> = ( ) => {
                             Created: {new Date(task.created_at).toLocaleDateString()}
                           </Typography>
                         </Box>
-                      </>
+                      </Box>
                     }
                   />
                 </ListItem>
