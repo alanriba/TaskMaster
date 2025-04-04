@@ -6,7 +6,7 @@ import { Task } from "../../models/Task";
 
 vi.mock("../../api/taskApi", async () => ({
   TaskServiceApi: {
-    update: vi.fn(),
+    update: vi.fn().mockResolvedValue([]),
   },
 }));
 
