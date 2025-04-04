@@ -1,3 +1,4 @@
+import { Tag } from '../models/Tag';
 import { Task, TaskCreate, TaskUpdate, StatusUpdate } from '../models/Task';
 import apiClient from './apiClient';
 
@@ -9,6 +10,7 @@ export interface TaskQueryParams {
   due_date_after?: string;
   search?: string;
   ordering?: string;
+  tags?: string; 
 }
 
 export const TaskServiceApi = {
@@ -34,5 +36,14 @@ export const TaskServiceApi = {
 
   delete: (id: number): Promise<void> => {
     return apiClient.delete<void>(`/tasks/${id}/`);
+  },
+  
+  getAllTags: (): Promise<Tag[]> => {
+    return apiClient.get<Tag[]>('/tags/'); // asegúrate que este endpoint esté en tu backend
+  },
+
+  createTag: (name: string): Promise<Tag> => {
+    return apiClient.post<Tag>('/tags/', { name });
   }
+
 };

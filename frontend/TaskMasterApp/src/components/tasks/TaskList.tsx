@@ -16,7 +16,9 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  Snackbar
+  Snackbar,
+  Autocomplete,
+  TextField
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -26,6 +28,7 @@ import { Task } from '../../models/Task';
 import CreateTaskForm from './CreateTaskForm';
 import EditTaskForm from './EditTaskForm'; 
 import { User } from '../../models/User';
+import { Tag } from '../../models/Tag';
 
 interface TaskListProps {
   user?: User;
@@ -68,12 +71,15 @@ const TaskList: React.FC<TaskListProps> = () => {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [taskToDelete, setTaskToDelete] = useState<Task | null>(null);
   const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({ open: false, message: '', severity: 'success' });
+  const [allTags, setAllTags] = useState<Tag[]>([]);
+  const [selectedTagIds, setSelectedTagIds] = useState<number[]>([]);
 
-  const fetchTasks = async () => {
+  const fetchTasks = async (tagIds: number[] = []) => {
     setLoading(true);
     setError(null);
     try {
-      const tasksData = await TaskServiceApi.getAll();
+      const query = tagIds.length > 0 ? { tags: tagIds.join(',') } : undefined;
+      const tasksData = await TaskServiceApi.getAll(query);
       setTasks(tasksData);
     } catch (error) {
       setError(error instanceof Error ? error.message : 'Failed to fetch tasks');
@@ -84,6 +90,12 @@ const TaskList: React.FC<TaskListProps> = () => {
 
   useEffect(() => {
     fetchTasks();
+  }, []);
+
+  useEffect(() => {
+    TaskServiceApi.getAllTags()
+      .then(setAllTags)
+      .catch(() => setAllTags([]));
   }, []);
 
   const handleCreateTask = () => setIsCreateModalOpen(true);
@@ -123,11 +135,29 @@ const TaskList: React.FC<TaskListProps> = () => {
     }
   };
 
+  const handleTagFilterChange = (_event: React.SyntheticEvent, value: Tag[]) => {
+    const ids = value.map(tag => tag.id);
+    setSelectedTagIds(ids);
+    fetchTasks(ids);
+  };
+
   return (
     <Container maxWidth="md" sx={{ py: 4 }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <Typography variant="h4">My Tasks</Typography>
         <Button variant="contained" startIcon={<AddIcon />} onClick={handleCreateTask}>New Task</Button>
+        <Autocomplete 
+          sx={{ display: 'none'}}
+          multiple
+          options={allTags}
+          getOptionLabel={(option) => option.name}
+          value={allTags.filter(tag => selectedTagIds.includes(tag.id))}
+          onChange={handleTagFilterChange}
+          renderInput={(params) => (
+            <TextField {...params} label="Filter by Tags" placeholder="Tags" margin="normal" />
+          )}
+          isOptionEqualToValue={(option, value) => option.id === value.id}
+        /> 
       </Box>
 
       <Paper elevation={2} sx={{ p: 2 }}>
@@ -139,7 +169,9 @@ const TaskList: React.FC<TaskListProps> = () => {
           <Typography textAlign="center">No tasks found</Typography>
         ) : (
           <List>
-            {tasks.map((task, index) => (
+            {tasks.map((task, index) => {
+              console.log('Task:', task); // Debugging line
+              return (
               <React.Fragment key={task.id}>
                 {index > 0 && <Divider />}
                 <ListItem sx={{ py: 2 }}>
@@ -156,13 +188,19 @@ const TaskList: React.FC<TaskListProps> = () => {
                     secondary={
                       <Box>
                         <Typography variant="body2" component="div" sx={{ mb: 1 }}>{task.description}</Typography>
+                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: 1 }}>
+                          {task.tags?.map(tag => (
+                            <Chip key={tag.id} label={tag.name} size="small" variant="outlined" />
+                          ))}
+                        </Box>
                         <Chip label={getStatusLabel(task.status)} color={getStatusColor(task.status)} size="small" />
                       </Box>
                     }
                   />
                 </ListItem>
               </React.Fragment>
-            ))}
+              );
+            })}
           </List>
         )}
       </Paper>

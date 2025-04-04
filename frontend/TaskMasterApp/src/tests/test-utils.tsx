@@ -5,6 +5,7 @@ import { AuthContext } from "../contexts/AuthContext";
 import { vi } from "vitest";
 import { RegisterRequest, User } from "../models/User";
 import { AuthContextType } from "../types/AuthContextType";
+import { Tag } from "../models/Tag";
 
 interface AuthContextValue {
   isAuthenticated: boolean;
@@ -31,7 +32,6 @@ const defaultAuthValues: AuthContextValue = {
 export const mockUseAuth = (values: Partial<AuthContextType> = {}) => {
   vi.resetModules();
 
-  // Requiere que el mock esté dentro de cada test o `beforeEach`
   vi.doMock("../hooks/useAuth", () => ({
     useAuth: () => ({
       ...defaultAuthValues,
@@ -39,6 +39,19 @@ export const mockUseAuth = (values: Partial<AuthContextType> = {}) => {
     }),
   }));
 };
+
+export const mockTags: Tag[] = [
+  {
+    id: 1,
+    name: "Important",
+    color: "#FF5733",
+  },
+  {
+    id: 2,
+    name: "Urgent",
+    color: "#33FF57",
+  },
+];
 
 interface CustomRenderOptions extends Omit<RenderOptions, "wrapper"> {
   authValues?: Partial<AuthContextValue>;
@@ -69,3 +82,13 @@ export function renderWithProviders(
     mockAuthContext,
   };
 }
+
+export const mockTaskServiceApi = {
+  getAll: vi.fn().mockResolvedValue(mockTags),
+  getAllTags: vi.fn().mockResolvedValue(mockTags),
+  create: vi.fn(),
+  delete: vi.fn(),
+  update: vi.fn(),
+  changeStatus: vi.fn(),
+  createTag: vi.fn()
+};

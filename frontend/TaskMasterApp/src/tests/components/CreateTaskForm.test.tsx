@@ -1,13 +1,23 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import CreateTaskForm from '../../components/tasks/CreateTaskForm';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
-import { TaskServiceApi } from '../../api/taskApi';
 
-vi.mock('../../api/taskApi', () => ({
-  TaskServiceApi: {
-    create: vi.fn()
-  }
-}));
+vi.mock('../../api/taskApi', async () => {
+  return {
+    TaskServiceApi: {
+      getAll: vi.fn(),
+      delete: vi.fn(),
+      create: vi.fn(),
+      update: vi.fn(),
+      changeStatus: vi.fn(),
+      getAllTags: vi.fn().mockResolvedValue([]),
+      createTag: vi.fn()
+    }
+  };
+});
+
+import { TaskServiceApi } from '../../api/taskApi';
+import CreateTaskForm from '../../components/tasks/CreateTaskForm';
+
 
 describe('CreateTaskForm', () => {
   const mockOnClose = vi.fn();
@@ -15,7 +25,8 @@ describe('CreateTaskForm', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-  });
+    vi.mocked(TaskServiceApi.getAll).mockResolvedValue([]);
+    vi.mocked(TaskServiceApi.getAllTags).mockResolvedValue([]);});
 
   const renderForm = () => {
     render(
@@ -27,11 +38,11 @@ describe('CreateTaskForm', () => {
     );
   };
 
-  it('should render the form', () => {
-    renderForm();
-    expect(screen.getByLabelText(/title/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/description/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/status/i)).toBeInTheDocument();
+  it('should render the form',async() => {
+    render(<CreateTaskForm open={true} onClose={mockOnClose} onTaskCreated={mockOnTaskCreated} />);
+    expect(screen.getByLabelText(/Title/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Description/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Status/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /create task/i })).toBeInTheDocument();
   });
 
