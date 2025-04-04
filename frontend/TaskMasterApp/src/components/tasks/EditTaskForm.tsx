@@ -49,7 +49,7 @@ const EditTaskForm: React.FC<EditTaskFormProps> = ({ open, onClose, onTaskUpdate
 
   useEffect(() => {
     if (task) {
-      const { id: _id, ...rest } = task;
+      const { ...rest } = task;
       setFormData(rest);
     }
   }, [task]);

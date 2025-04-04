@@ -11,20 +11,28 @@ import {
   Chip,
   Divider,
   CircularProgress,
-  Alert
+  Alert,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Snackbar
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { ChipProps } from '@mui/material';
 import { TaskServiceApi } from '../../api/taskApi';
 import { Task } from '../../models/Task';
 import CreateTaskForm from './CreateTaskForm';
-import EditTaskForm from './EditTaskForm';
+import EditTaskForm from './EditTaskForm'; 
 import { User } from '../../models/User';
 
-type TaskStatus = 'pending' | 'in_progress' | 'completed';
-type ChipColor = ChipProps['color'];
+interface TaskListProps {
+  user?: User;
+}
 
-const getStatusColor = (status: TaskStatus): ChipColor => {
+
+const getStatusColor = (status: Task['status']): ChipProps['color'] => {
   switch (status) {
     case 'pending':
       return 'default';
@@ -37,7 +45,7 @@ const getStatusColor = (status: TaskStatus): ChipColor => {
   }
 };
 
-const getStatusLabel = (status: TaskStatus): string => {
+const getStatusLabel = (status: Task['status']): string => {
   switch (status) {
     case 'pending':
       return 'To Do';
@@ -50,10 +58,6 @@ const getStatusLabel = (status: TaskStatus): string => {
   }
 };
 
-interface TaskListProps {
-  user?: User;
-}
-
 const TaskList: React.FC<TaskListProps> = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
@@ -61,11 +65,13 @@ const TaskList: React.FC<TaskListProps> = () => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [taskToDelete, setTaskToDelete] = useState<Task | null>(null);
+  const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({ open: false, message: '', severity: 'success' });
 
   const fetchTasks = async () => {
     setLoading(true);
     setError(null);
-
     try {
       const tasksData = await TaskServiceApi.getAll();
       setTasks(tasksData);
@@ -80,114 +86,79 @@ const TaskList: React.FC<TaskListProps> = () => {
     fetchTasks();
   }, []);
 
-  const handleCreateTask = () => {
-    setIsCreateModalOpen(true);
-  };
-
-  const handleCloseCreateModal = () => {
-    setIsCreateModalOpen(false);
-  };
-
-  const handleTaskCreated = () => {
-    fetchTasks();
-  };
+  const handleCreateTask = () => setIsCreateModalOpen(true);
+  const handleCloseCreateModal = () => setIsCreateModalOpen(false);
+  const handleTaskCreated = () => fetchTasks();
 
   const handleEditTask = (task: Task) => {
     setSelectedTask(task);
     setIsEditModalOpen(true);
   };
-
   const handleCloseEditModal = () => {
     setIsEditModalOpen(false);
     setSelectedTask(null);
   };
+  const handleTaskUpdated = () => fetchTasks();
 
-  const handleTaskUpdated = () => {
-    fetchTasks();
+  const confirmDeleteTask = (task: Task) => {
+    setTaskToDelete(task);
+    setIsDeleteDialogOpen(true);
+  };
+  const handleCloseDeleteDialog = () => {
+    setIsDeleteDialogOpen(false);
+    setTaskToDelete(null);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!taskToDelete) return;
+    try {
+      await TaskServiceApi.delete(taskToDelete.id);
+      setSnackbar({ open: true, message: 'Task deleted successfully', severity: 'success' });
+      fetchTasks();
+    } catch {
+      setSnackbar({ open: true, message: 'Failed to delete task', severity: 'error' });
+    }
+    finally {
+      handleCloseDeleteDialog();
+    }
   };
 
   return (
     <Container maxWidth="md" sx={{ py: 4 }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h4" component="h1" gutterBottom>
-          My Tasks
-        </Typography>
-        <Button
-          variant="contained"
-          color="primary"
-          startIcon={<AddIcon />}
-          onClick={handleCreateTask}
-        >
-          New Task
-        </Button>
+        <Typography variant="h4">My Tasks</Typography>
+        <Button variant="contained" startIcon={<AddIcon />} onClick={handleCreateTask}>New Task</Button>
       </Box>
 
       <Paper elevation={2} sx={{ p: 2 }}>
         {loading ? (
-          <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
-            <CircularProgress />
-          </Box>
+          <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}><CircularProgress /></Box>
         ) : error ? (
-          <Alert severity="error" sx={{ my: 2 }}>
-            {error}
-          </Alert>
+          <Alert severity="error">{error}</Alert>
         ) : tasks.length === 0 ? (
-          <Box sx={{ textAlign: 'center', py: 3 }}>
-            <Typography variant="body1" color="text.secondary">
-              You haven't created any tasks yet. Click the "New Task" button to get started!
-            </Typography>
-          </Box>
+          <Typography textAlign="center">No tasks found</Typography>
         ) : (
-          <List disablePadding>
+          <List>
             {tasks.map((task, index) => (
               <React.Fragment key={task.id}>
-                {index > 0 && <Divider component="li" />}
-                <ListItem alignItems="flex-start" sx={{ py: 2 }}>
+                {index > 0 && <Divider />}
+                <ListItem sx={{ py: 2 }}>
                   <ListItemText
-                    primary={
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <Typography variant="h6" component="div" sx={{ mb: 1 }}>
-                          {task.title}
-                        </Typography>
-                        <Button
-                          size="small"
-                          variant="outlined"
-                          onClick={() => handleEditTask(task)}
-                        >
-                          Edit
+                    primary={<Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <Typography variant="h6">{task.title}</Typography>
+                      <Box>
+                        <Button onClick={() => handleEditTask(task)} size="small" variant="outlined">Edit</Button>
+                        <Button onClick={() => confirmDeleteTask(task)} size="small" variant="outlined" color="error" startIcon={<DeleteIcon />} sx={{ ml: 1 }}>
+                          Delete
                         </Button>
                       </Box>
-                    }
+                    </Box>}
                     secondary={
                       <Box>
-                        <Typography
-                          variant="body2"
-                          color="text.primary"
-                          sx={{
-                            mb: 1,
-                            display: '-webkit-box',
-                            WebkitLineClamp: 3,
-                            WebkitBoxOrient: 'vertical',
-                            overflow: 'hidden'
-                          }}
-                          component="div"
-                        >
-                          {task.description || 'No description provided'}
-                        </Typography>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 1 }}>
-                          <Chip
-                            label={getStatusLabel(task.status)}
-                            color={getStatusColor(task.status)}
-                            size="small"
-                            variant="outlined"
-                          />
-                          <Typography variant="caption" color="text.secondary">
-                            Created: {new Date(task.created_at).toLocaleDateString()}
-                          </Typography>
-                        </Box>
+                        <Typography variant="body2" component="div" sx={{ mb: 1 }}>{task.description}</Typography>
+                        <Chip label={getStatusLabel(task.status)} color={getStatusColor(task.status)} size="small" />
                       </Box>
                     }
-                    secondaryTypographyProps={{ component: 'div' }}
                   />
                 </ListItem>
               </React.Fragment>
@@ -196,20 +167,30 @@ const TaskList: React.FC<TaskListProps> = () => {
         )}
       </Paper>
 
-      <CreateTaskForm
-        open={isCreateModalOpen}
-        onClose={handleCloseCreateModal}
-        onTaskCreated={handleTaskCreated}
-      />
+      <CreateTaskForm open={isCreateModalOpen} onClose={handleCloseCreateModal} onTaskCreated={handleTaskCreated} />
+      {selectedTask && <EditTaskForm open={isEditModalOpen} onClose={handleCloseEditModal} onTaskUpdated={handleTaskUpdated} task={selectedTask} />}
 
-      {selectedTask && (
-        <EditTaskForm
-          open={isEditModalOpen}
-          onClose={handleCloseEditModal}
-          onTaskUpdated={handleTaskUpdated}
-          task={selectedTask}
-        />
-      )}
+      <Dialog open={isDeleteDialogOpen} onClose={handleCloseDeleteDialog}>
+        <DialogTitle>Confirm Deletion</DialogTitle>
+        <DialogContent>
+          Are you sure you want to delete the task "{taskToDelete?.title}"?
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDeleteDialog}>Cancel</Button>
+          <Button onClick={handleConfirmDelete} color="error" variant="contained">Delete</Button>
+        </DialogActions>
+      </Dialog>
+
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={4000}
+        onClose={() => setSnackbar(prev => ({ ...prev, open: false }))}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert severity={snackbar.severity} variant="filled" onClose={() => setSnackbar(prev => ({ ...prev, open: false }))}>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Container>
   );
 };
