@@ -143,23 +143,29 @@ const TaskList: React.FC<TaskListProps> = () => {
 
   return (
     <Container maxWidth="md" sx={{ py: 4 }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+      <Box sx={{ mb: 2 }}>
         <Typography variant="h4">My Tasks</Typography>
-        <Button variant="contained" startIcon={<AddIcon />} onClick={handleCreateTask}>New Task</Button>
+      </Box>
+
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+        <Button variant="contained" startIcon={<AddIcon />} onClick={handleCreateTask}>
+          New Task
+        </Button>
+      </Box>
+
+      <Box sx={{ mb: 3 }}>
         <Autocomplete 
-          sx={{ display: 'none'}}
           multiple
           options={allTags}
           getOptionLabel={(option) => option.name}
           value={allTags.filter(tag => selectedTagIds.includes(tag.id))}
           onChange={handleTagFilterChange}
           renderInput={(params) => (
-            <TextField {...params} label="Filter by Tags" placeholder="Tags" margin="normal" />
+            <TextField {...params} label="Filter by Tags" placeholder="Tags" margin="normal" fullWidth />
           )}
           isOptionEqualToValue={(option, value) => option.id === value.id}
-        /> 
+        />
       </Box>
-
       <Paper elevation={2} sx={{ p: 2 }}>
         {loading ? (
           <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}><CircularProgress /></Box>
