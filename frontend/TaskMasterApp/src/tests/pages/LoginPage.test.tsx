@@ -1,22 +1,42 @@
 import { screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeAll } from 'vitest';
 import { renderWithProviders } from '../test-utils';
 
-vi.mock('../../hooks/useAuth', () => ({
-  useAuth: () => ({
-    isAuthenticated: false,
-    login: vi.fn(),
-    logout: vi.fn(),
-    register: vi.fn(),
-    clearError: vi.fn(),
-    user: null,
-    error: null,
-    loading: false,
-  }),
+beforeAll(() => {
+  vi.mock('../../hooks/useAuth', () => ({
+    useAuth: () => ({
+      isAuthenticated: false,
+      login: vi.fn(),
+      logout: vi.fn(),
+      register: vi.fn(),
+      clearError: vi.fn(),
+      user: null,
+      error: null,
+      loading: false,
+    }),
+  }));
+  
+
+  vi.mock('@mui/icons-material', () => ({
+
+    LockOutlined: () => 'LockOutlinedIcon',
+ 
+  }));
+});
+vi.mock('../../components/auth/LoginForm', () => ({
+  default: () => <div data-testid="login-form" className="mocked-login-form"></div>
 }));
 
-// IMPORTAR DESPUÉS DEL MOCK
+vi.mock('@mui/icons-material/Visibility', () => ({
+  default: () => 'VisibilityIcon'
+}));
+
+vi.mock('@mui/icons-material/VisibilityOff', () => ({
+  default: () => 'VisibilityOffIcon'
+}));
+
+// Importar después de los mocks
 import LoginPage from '../../pages/LoginPage';
 
 describe('LoginPage', () => {

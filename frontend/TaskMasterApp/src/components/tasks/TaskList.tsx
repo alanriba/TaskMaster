@@ -133,7 +133,7 @@ const TaskList: React.FC<TaskListProps> = () => {
                       </Typography>
                     }
                     secondary={
-                      <Box component="div">
+                      <Box>
                         <Typography
                           variant="body2"
                           color="text.primary"
@@ -161,6 +161,7 @@ const TaskList: React.FC<TaskListProps> = () => {
                         </Box>
                       </Box>
                     }
+                    secondaryTypographyProps={{ component: 'div' }}
                   />
                 </ListItem>
               </React.Fragment>
