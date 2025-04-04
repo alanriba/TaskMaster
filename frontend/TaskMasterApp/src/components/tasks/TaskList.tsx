@@ -18,6 +18,7 @@ import { ChipProps } from '@mui/material';
 import { TaskServiceApi } from '../../api/taskApi';
 import { Task } from '../../models/Task';
 import CreateTaskForm from './CreateTaskForm';
+import EditTaskForm from './EditTaskForm';
 import { User } from '../../models/User';
 
 type TaskStatus = 'pending' | 'in_progress' | 'completed';
@@ -58,6 +59,8 @@ const TaskList: React.FC<TaskListProps> = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   const fetchTasks = async () => {
     setLoading(true);
@@ -86,6 +89,20 @@ const TaskList: React.FC<TaskListProps> = () => {
   };
 
   const handleTaskCreated = () => {
+    fetchTasks();
+  };
+
+  const handleEditTask = (task: Task) => {
+    setSelectedTask(task);
+    setIsEditModalOpen(true);
+  };
+
+  const handleCloseEditModal = () => {
+    setIsEditModalOpen(false);
+    setSelectedTask(null);
+  };
+
+  const handleTaskUpdated = () => {
     fetchTasks();
   };
 
@@ -128,9 +145,18 @@ const TaskList: React.FC<TaskListProps> = () => {
                 <ListItem alignItems="flex-start" sx={{ py: 2 }}>
                   <ListItemText
                     primary={
-                      <Typography variant="h6" component="div" sx={{ mb: 1 }}>
-                        {task.title}
-                      </Typography>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <Typography variant="h6" component="div" sx={{ mb: 1 }}>
+                          {task.title}
+                        </Typography>
+                        <Button
+                          size="small"
+                          variant="outlined"
+                          onClick={() => handleEditTask(task)}
+                        >
+                          Edit
+                        </Button>
+                      </Box>
                     }
                     secondary={
                       <Box>
@@ -146,7 +172,7 @@ const TaskList: React.FC<TaskListProps> = () => {
                           }}
                           component="div"
                         >
-                          {task.description || "No description provided"}
+                          {task.description || 'No description provided'}
                         </Typography>
                         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 1 }}>
                           <Chip
@@ -175,6 +201,15 @@ const TaskList: React.FC<TaskListProps> = () => {
         onClose={handleCloseCreateModal}
         onTaskCreated={handleTaskCreated}
       />
+
+      {selectedTask && (
+        <EditTaskForm
+          open={isEditModalOpen}
+          onClose={handleCloseEditModal}
+          onTaskUpdated={handleTaskUpdated}
+          task={selectedTask}
+        />
+      )}
     </Container>
   );
 };

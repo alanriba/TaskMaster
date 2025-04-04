@@ -80,3 +80,28 @@ class TestTasks:
         assert any(task['title'] == 'Task 1' for task in response.data)
         assert any(task['title'] == 'Task 2' for task in response.data)
         assert not any(task['title'] == 'Other User Task' for task in response.data)
+        
+    def test_update_task_authenticated(self, authenticate_client, create_user):
+        client = authenticate_client
+        task = Task.objects.create(
+            title='Original Title',
+            description='Original description',
+            status='pending',
+            user=create_user
+        )
+            
+        url = reverse('task-detail', args=[task.id])
+        updated_data = {
+            'title': 'Updated Title',
+            'description': 'Updated description',
+            'status': 'in_progress'
+        }
+
+        response = client.put(url, updated_data, format='json')
+        task.refresh_from_db()
+
+        assert response.status_code == status.HTTP_200_OK
+        assert task.title == updated_data['title']
+        assert task.description == updated_data['description']
+        assert task.status == updated_data['status']
+        
