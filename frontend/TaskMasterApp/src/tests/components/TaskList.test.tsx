@@ -20,7 +20,10 @@ vi.mock('../../api/taskApi', async () => {
       create: vi.fn(),
       update: vi.fn(),
       changeStatus: vi.fn(),
-      getAllTags: vi.fn().mockResolvedValue([]),
+      getAllTags: vi.fn().mockResolvedValue([
+        { id: 1, name: 'work' },
+        { id: 2, name: 'Tag2' },
+      ]),
       createTag: vi.fn()
     }
   };
@@ -148,5 +151,20 @@ describe('TaskList - Delete Task Feature', () => {
     });
 
     expect(await screen.findByText(/task deleted successfully/i)).toBeInTheDocument();
+  });
+});
+
+describe("TaskList - Tag Filter", () => {
+  it("renders the tag filter and allows selecting tags", async () => {
+    render(<TaskList />);
+
+    const filterInput = await screen.findByLabelText(/filter by tags/i);
+    expect(filterInput).toBeInTheDocument();
+
+    fireEvent.focus(filterInput);
+    fireEvent.keyDown(filterInput, { key: "ArrowDown" });
+
+    const option = await screen.findByText("work");
+    expect(option).toBeInTheDocument();
   });
 });
