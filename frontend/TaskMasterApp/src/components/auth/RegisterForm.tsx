@@ -14,7 +14,7 @@ import {
   InputAdornment,
   IconButton
 } from '@mui/material';
-import Grid from '@mui/material/Grid';
+import {Grid} from '@mui/material';
 
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { RegisterRequest } from '../../types/AuthContextType'; // Asegúrate que esta ruta sea correcta
@@ -108,7 +108,7 @@ const RegisterForm: React.FC = () => {
           />
 
           <Grid container spacing={2}>
-          <Grid columns={12} size={6}>
+            <Grid columns={12} size={6}>
               <TextField
                 fullWidth
                 margin="normal"

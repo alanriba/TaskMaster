@@ -6,6 +6,7 @@ afterEach(() => {
   cleanup();
 });
 
+
 // Mock for useNavigate
 vi.mock('react-router-dom', async () => {
   const actual = await vi.importActual('react-router-dom');
