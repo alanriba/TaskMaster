@@ -25,6 +25,12 @@ import { TaskServiceApi } from '../../api/taskApi';
 import { Task } from '../../models/Task';
 import CreateTaskForm from './CreateTaskForm';
 import EditTaskForm from './EditTaskForm'; 
+import { User } from '../../models/User';
+
+interface TaskListProps {
+  user?: User;
+}
+
 
 const getStatusColor = (status: Task['status']): ChipProps['color'] => {
   switch (status) {
@@ -52,7 +58,7 @@ const getStatusLabel = (status: Task['status']): string => {
   }
 };
 
-const TaskList: React.FC = () => {
+const TaskList: React.FC<TaskListProps> = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
