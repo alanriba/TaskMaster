@@ -13,6 +13,8 @@ export default defineConfig({
     cache: false, 
     testTimeout: 10000, 
     watch: false,
+    maxConcurrency: 1,
+   
     coverage: {
       reporter: ['text', 'json', 'html'],
       exclude: ['node_modules/', 'src/setupTests.ts']

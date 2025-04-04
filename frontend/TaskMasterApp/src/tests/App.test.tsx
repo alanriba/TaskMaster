@@ -1,16 +1,14 @@
 import { render, screen } from '@testing-library/react';
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect} from 'vitest';
 import { MemoryRouter } from 'react-router-dom';
 import LoginPage from '../pages/LoginPage';
 
-vi.mock('../utils/tokenStorage', () => ({
-  isAuthenticated: vi.fn().mockReturnValue(false),
-}));
-
+import { vi } from 'vitest';
 
 vi.mock('../components/auth/LoginForm', () => ({
-  default: () => <div data-testid="login-form">Mock LoginForm</div>,
+  default: () => <div data-testid="login-form">Mocked LoginForm</div>,
 }));
+
 
 describe('LoginPage', () => {
   it('renders login page correctly', () => {

@@ -10,6 +10,7 @@
     "preview": "vite preview",
     "test": "vitest",
     "test:clean": "node clean-test.js",
+    "test:ci": "vitest run --maxConcurrency=1 --pool=forks",
     "test:basic": "vitest --no-cache",
     "test:coverage": "vitest run --coverage"
   },
