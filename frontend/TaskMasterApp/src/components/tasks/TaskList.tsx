@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Container, 
-  Typography, 
-  Box, 
-  Button, 
-  Paper, 
-  List, 
-  ListItem, 
-  ListItemText, 
-  Chip, 
+import {
+  Container,
+  Typography,
+  Box,
+  Button,
+  Paper,
+  List,
+  ListItem,
+  ListItemText,
+  Chip,
   Divider,
   CircularProgress,
   Alert
@@ -95,9 +95,9 @@ const TaskList: React.FC<TaskListProps> = () => {
         <Typography variant="h4" component="h1" gutterBottom>
           My Tasks
         </Typography>
-        <Button 
-          variant="contained" 
-          color="primary" 
+        <Button
+          variant="contained"
+          color="primary"
           startIcon={<AddIcon />}
           onClick={handleCreateTask}
         >
@@ -127,7 +127,7 @@ const TaskList: React.FC<TaskListProps> = () => {
                 {index > 0 && <Divider component="li" />}
                 <ListItem alignItems="flex-start" sx={{ py: 2 }}>
                   <ListItemText
-                     primary={
+                    primary={
                       <Typography variant="h6" component="div" sx={{ mb: 1 }}>
                         {task.title}
                       </Typography>
@@ -149,10 +149,10 @@ const TaskList: React.FC<TaskListProps> = () => {
                           {task.description || "No description provided"}
                         </Typography>
                         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 1 }}>
-                          <Chip 
-                            label={getStatusLabel(task.status)} 
-                            color={getStatusColor(task.status)} 
-                            size="small" 
+                          <Chip
+                            label={getStatusLabel(task.status)}
+                            color={getStatusColor(task.status)}
+                            size="small"
                             variant="outlined"
                           />
                           <Typography variant="caption" color="text.secondary">
@@ -169,10 +169,10 @@ const TaskList: React.FC<TaskListProps> = () => {
         )}
       </Paper>
 
-      <CreateTaskForm 
-        open={isCreateModalOpen} 
-        onClose={handleCloseCreateModal} 
-        onTaskCreated={handleTaskCreated} 
+      <CreateTaskForm
+        open={isCreateModalOpen}
+        onClose={handleCloseCreateModal}
+        onTaskCreated={handleTaskCreated}
       />
     </Container>
   );
