@@ -1,5 +1,4 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import CreateTaskForm from '../../components/tasks/CreateTaskForm';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 
 vi.mock('../../api/taskApi', async () => {
@@ -17,6 +16,7 @@ vi.mock('../../api/taskApi', async () => {
 });
 
 import { TaskServiceApi } from '../../api/taskApi';
+import CreateTaskForm from '../../components/tasks/CreateTaskForm';
 
 
 describe('CreateTaskForm', () => {
