@@ -127,7 +127,7 @@ const TaskList: React.FC<TaskListProps> = () => {
                 {index > 0 && <Divider component="li" />}
                 <ListItem alignItems="flex-start" sx={{ py: 2 }}>
                   <ListItemText
-                    primary={
+                     primary={
                       <Typography variant="h6" component="div" sx={{ mb: 1 }}>
                         {task.title}
                       </Typography>
