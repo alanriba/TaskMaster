@@ -1,20 +1,24 @@
 {
-    "framework": null,
-    "builds": [
-      {
-        "src": "taskmaster_project/wsgi.py",
-        "use": "@vercel/python",
-        "config": { "maxLambdaSize": "15mb", "runtime": "python3.11" }
+  "framework": null,
+  "builds": [
+    {
+      "src": "taskmaster_project/wsgi.py",
+      "use": "@vercel/python",
+      "config": {
+        "maxLambdaSize": "15mb",
+        "runtime": "python3.11"
       }
-    ],
-    "routes": [
-      {
-        "src": "/(.*)",
-        "dest": "taskmaster_project/wsgi.py",
-        "headers": {
-          "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Methods": "GET, POST, OPTIONS, DELETE, PUT"
-        }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "taskmaster_project/wsgi.py",
+      "headers": {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET, POST, OPTIONS, DELETE, PUT"
       }
-    ]
-  }
+    }
+  ],
+  "postBuildCommand": "python manage.py migrate --noinput && python manage.py collectstatic --noinput"
+}
