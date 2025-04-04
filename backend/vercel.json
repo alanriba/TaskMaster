@@ -19,6 +19,5 @@
         "Access-Control-Allow-Methods": "GET, POST, OPTIONS, DELETE, PUT"
       }
     }
-  ],
-  "postBuildCommand": "python manage.py migrate --noinput && python manage.py collectstatic --noinput"
+  ]
 }
