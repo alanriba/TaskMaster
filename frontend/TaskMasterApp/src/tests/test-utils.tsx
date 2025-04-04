@@ -11,7 +11,7 @@ interface AuthContextValue {
   user: User | null;
   login: (username: string, password: string) => Promise<void>;
   register: (data: RegisterRequest) => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
   clearError: () => void;
   error: string | null;
   loading: boolean;
@@ -20,10 +20,10 @@ interface AuthContextValue {
 const defaultAuthValues: AuthContextValue = {
   isAuthenticated: false,
   user: null,
-  login: vi.fn(),
-  register: vi.fn(),
-  logout: vi.fn(),
-  clearError: vi.fn(),
+  login: vi.fn(() => Promise.resolve()), 
+  register: vi.fn(() => Promise.resolve()), 
+  logout: vi.fn(() => Promise.resolve()), 
+  clearError: vi.fn(() => Promise.resolve()), 
   error: null,
   loading: false,
 };
