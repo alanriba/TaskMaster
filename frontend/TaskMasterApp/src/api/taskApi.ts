@@ -1,10 +1,18 @@
-
-import apiClient from './apiClient';
 import { Task, TaskCreate, TaskUpdate, StatusUpdate } from '../models/Task';
+import apiClient from './apiClient';
 
-// Patrón de Fachada para API de tareas
-export const taskApi = {
-  getAll: (params?: any): Promise<Task[]> => {
+export interface TaskQueryParams {
+  status?: Task['status'];
+  priority?: Task['priority'];
+  category?: number;
+  due_date_before?: string;
+  due_date_after?: string;
+  search?: string;
+  ordering?: string;
+}
+
+export const TaskServiceApi = {
+  getAll: (params?: TaskQueryParams): Promise<Task[]> => {
     return apiClient.get<Task[]>('/tasks/', { params });
   },
 
